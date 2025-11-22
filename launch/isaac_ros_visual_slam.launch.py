@@ -1,0 +1,120 @@
+# example launch file.
+#
+# Created by Milos Cihlar on 13.10.2025
+
+from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
+
+from ament_index_python.packages import get_package_share_directory
+from nav2_common.launch import RewrittenYaml
+
+from launch_ros.actions import ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
+
+import os
+from typing import Optional, List
+
+
+def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntity]]:
+
+    config_dir = os.path.join(get_package_share_directory('visual_inertial_odometry'), 'config')
+
+    # Create the launch configuration variables
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    robot_name = LaunchConfiguration('robot_name')
+    robot_number = LaunchConfiguration('robot_number')
+    config = LaunchConfiguration('config')
+    imu_fusion = LaunchConfiguration('imu_fusion')
+    #cmd_vel = LaunchConfiguration('cmd_vel')
+
+    indexed_robot_name = [robot_name.perform(context), '_', robot_number.perform(context)] if robot_number.perform(context) else [robot_name.perform(context)]
+    indexed_robot_name = ''.join(indexed_robot_name)
+
+    config_substitutions = { 
+            'enable_imu_fusion': imu_fusion.perform(context),
+            'base_frame': indexed_robot_name + '_base_link',
+            'imu_frame': indexed_robot_name + '_base_link',
+            'camera_optical_frames': [
+                indexed_robot_name + '_realsense_d435_infra1_optical_frame',
+                indexed_robot_name + '_realsense_d435_infra2_optical_frame',
+                ],
+    }
+
+    config_dir = os.path.join(config_dir, robot_name.perform(context))
+    os.chdir(config_dir)
+
+    configured_config_file = RewrittenYaml(
+        source_file = config,
+        root_key = indexed_robot_name + '/vio_isaac',
+        param_rewrites = config_substitutions,
+        convert_types = True)
+
+    visual_slam_node = ComposableNode(
+        package = 'isaac_ros_visual_slam',
+        name = 'visual_slam_node',
+        namespace = indexed_robot_name + '/vio_isaac',
+        plugin = 'nvidia::isaac_ros::visual_slam::VisualSlamNode',
+        parameters = [configured_config_file,],
+        remappings = [
+            ('visual_slam/image_0',
+            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra1/image_rect_raw'),
+            
+            ('visual_slam/camera_info_0',
+            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra1/camera_info'),
+            
+            ('visual_slam/image_1',
+            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra2/image_rect_raw'),
+            
+            ('visual_slam/camera_info_1',
+            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra2/camera_info'),
+
+            ('visual_slam/imu', 
+            f'/{indexed_robot_name}/aircraft/imu'),
+        ],
+    )
+
+    visual_slam_container = ComposableNodeContainer(
+        package='rclcpp_components',
+        executable='component_container',
+        name='visual_slam_launch_container',
+        namespace=indexed_robot_name + '/isaac_vio',
+        composable_node_descriptions=[visual_slam_node],
+        output='screen',
+    )
+    return [LaunchDescription([visual_slam_container])]
+
+
+def generate_launch_description():
+    return LaunchDescription([
+        # Declare the launch arguments
+        DeclareLaunchArgument(
+            name='use_sim_time',
+            default_value='False',
+            description='Use simulation (Gazebo) clock if true.'
+        ),
+        DeclareLaunchArgument(
+            name='robot_name',
+            description='Robot name (ex: "robot").'
+        ),
+        DeclareLaunchArgument(
+            name='robot_number',
+            default_value='',
+            description='Robot number, which will be appended to the robot name if defined ("<name>_<number>", '
+                        'default is empty).'
+        ),
+        DeclareLaunchArgument(
+            name='config',
+            description='Algorithm configuration.'
+        ),
+        DeclareLaunchArgument(
+            name='imu_fusion',
+            default_value='True',
+            description='Enable IMU fusion. (False = disbled)'
+        ),
+        # Perform the launch setup
+        OpaqueFunction(function=launch_setup)
+    ])
