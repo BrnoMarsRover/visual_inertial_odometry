@@ -39,11 +39,11 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
             'enable_slam_localization': slam_localization.perform(context),
             'map_frame': 'map',
             'odom_frame': 'odom',
-            'base_frame': indexed_robot_name + '_base_link',
-            'imu_frame': indexed_robot_name + '_base_link',
+            'base_frame': f'{indexed_robot_name}_base_link',
+            'imu_frame':  f'{indexed_robot_name}_base_link',
             'camera_optical_frames': [
-                indexed_robot_name + '_realsense_d435_infra1_optical_frame',
-                indexed_robot_name + '_realsense_d435_infra2_optical_frame',
+                f'{indexed_robot_name}_realsense_d435_infra1_optical_frame',
+                f'{indexed_robot_name}_realsense_d435_infra2_optical_frame',
                 ],
     }
 

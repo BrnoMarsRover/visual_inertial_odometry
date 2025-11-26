@@ -16,9 +16,8 @@ visual_slam_node:
     enable_landmarks_view: True
     enable_observations_view: True
 
-    base_frame: f450_1_base_link
-    imu_frame: f450_1_base_link
-    camera_optical_frames:
-      - f450_1_realsense_d435_infra1_optical_frame
-      - f450_1_realsense_d435_infra2_optical_frame
+    base_frame: "base_link"
+    imu_frame:  "base_link"
+    camera_optical_frames: [ "realsense_d435_infra1_optical_frame",
+                             "realsense_d435_infra2_optical_frame" ]
         
