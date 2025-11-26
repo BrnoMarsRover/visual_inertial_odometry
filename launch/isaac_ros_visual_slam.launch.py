@@ -14,6 +14,7 @@ from nav2_common.launch import RewrittenYaml
 
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
+from yaml import safe_dump
 
 import os
 from typing import Optional, List
@@ -41,10 +42,10 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
             'odom_frame': 'odom',
             'base_frame': f'{indexed_robot_name}_base_link',
             'imu_frame':  f'{indexed_robot_name}_base_link',
-            'camera_optical_frames': [
+            'camera_optical_frames': safe_dump([
                 f'{indexed_robot_name}_realsense_d435_infra1_optical_frame',
                 f'{indexed_robot_name}_realsense_d435_infra2_optical_frame',
-                ],
+                ]),
     }
 
     config_dir = os.path.join(vio_dir_config, robot_name.perform(context))
