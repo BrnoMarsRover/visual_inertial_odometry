@@ -29,13 +29,16 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
     robot_number = LaunchConfiguration('robot_number')
     config = LaunchConfiguration('config')
     imu_fusion = LaunchConfiguration('imu_fusion')
-    #cmd_vel = LaunchConfiguration('cmd_vel')
+    slam_localization = LaunchConfiguration('slam_localization')
 
     indexed_robot_name = [robot_name.perform(context), '_', robot_number.perform(context)] if robot_number.perform(context) else [robot_name.perform(context)]
     indexed_robot_name = ''.join(indexed_robot_name)
 
     config_substitutions = { 
             'enable_imu_fusion': imu_fusion.perform(context),
+            'enable_slam_localization': slam_localization.perform(context),
+            'map_frame': 'map',
+            'odom_frame': 'odom',
             'base_frame': indexed_robot_name + '_base_link',
             'imu_frame': indexed_robot_name + '_base_link',
             'camera_optical_frames': [
@@ -114,6 +117,11 @@ def generate_launch_description():
             name='imu_fusion',
             default_value='True',
             description='Enable IMU fusion. (False = disbled)'
+        ),
+        DeclareLaunchArgument(
+            name='slam_localization',
+            default_value='True',
+            description='Activate SLAM localization. (False = disabled)'
         ),
         # Perform the launch setup
         OpaqueFunction(function=launch_setup)
