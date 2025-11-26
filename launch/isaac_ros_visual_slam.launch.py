@@ -42,10 +42,10 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
             'odom_frame': 'odom',
             'base_frame': f'{indexed_robot_name}_base_link',
             'imu_frame':  f'{indexed_robot_name}_base_link',
-            'camera_optical_frames': safe_dump([
-                f'{indexed_robot_name}_realsense_d435_infra1_optical_frame',
-                f'{indexed_robot_name}_realsense_d435_infra2_optical_frame',
-                ]),
+            #'camera_optical_frames': [
+            #    f'{indexed_robot_name}_realsense_d435_infra1_optical_frame',
+            #    f'{indexed_robot_name}_realsense_d435_infra2_optical_frame',
+            #   ],
     }
 
     config_dir = os.path.join(vio_dir_config, robot_name.perform(context))
