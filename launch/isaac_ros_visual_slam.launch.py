@@ -21,7 +21,7 @@ from typing import Optional, List
 
 def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntity]]:
 
-    config_dir = os.path.join(get_package_share_directory('visual_inertial_odometry'), 'config')
+    vio_dir_config = os.path.join(get_package_share_directory('visual_inertial_odometry'), 'config')
 
     # Create the launch configuration variables
     use_sim_time = LaunchConfiguration('use_sim_time')
@@ -47,7 +47,7 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
                 ],
     }
 
-    config_dir = os.path.join(config_dir, robot_name.perform(context))
+    config_dir = os.path.join(vio_dir_config, robot_name.perform(context))
     os.chdir(config_dir)
 
     configured_config_file = RewrittenYaml(
