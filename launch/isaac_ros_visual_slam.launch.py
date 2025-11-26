@@ -84,7 +84,7 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
         package='rclcpp_components',
         executable='component_container',
         name='visual_slam_launch_container',
-        namespace=indexed_robot_name + '/isaac_vio',
+        namespace=indexed_robot_name + '/vio_isaac',
         composable_node_descriptions=[visual_slam_node],
         output='screen',
     )
