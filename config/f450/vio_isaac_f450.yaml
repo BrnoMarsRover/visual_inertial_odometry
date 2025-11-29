@@ -20,4 +20,3 @@ visual_slam_node:
     imu_frame:  "base_link"
     camera_optical_frames: [ "f450_1_realsense_d435_infra1_optical_frame",
                              "f450_1_realsense_d435_infra2_optical_frame" ]
-        
