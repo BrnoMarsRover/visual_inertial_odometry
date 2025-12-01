@@ -6,16 +6,19 @@ visual_slam_node:
     gyro_random_walk: 6.515000786205241e-06
     accel_noise_density: 0.001457588076418319
     accel_random_walk: 0.0002895559589895292
+    calibration_frequency: 90.0
 
     #Others from isaac example
     enable_image_denoising: False
     rectified_images: True
-    calibration_frequency: 200.0
     image_jitter_threshold_ms: 34.00    
     enable_slam_visualization: True
     enable_landmarks_view: True
     enable_observations_view: True
 
+    #Frames
+    map_frame: "map"
+    odom_frame: "odom"
     base_frame: "base_link"
     imu_frame:  "base_link"
     camera_optical_frames: [ "f450_1_realsense_d435_infra1_optical_frame",

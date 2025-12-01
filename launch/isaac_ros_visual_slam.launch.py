@@ -25,10 +25,17 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
     vio_dir_config = os.path.join(get_package_share_directory('visual_inertial_odometry'), 'config')
 
     # Create the launch configuration variables
-    use_sim_time = LaunchConfiguration('use_sim_time')
     robot_name = LaunchConfiguration('robot_name')
     robot_number = LaunchConfiguration('robot_number')
+
     config = LaunchConfiguration('config')
+
+    image0_topic = LaunchConfiguration('image1_topic')
+    camera0_topic = LaunchConfiguration('camera1_topic')
+    image1_topic = LaunchConfiguration('image2_topic')
+    camera1_topic = LaunchConfiguration('camera2_topic')
+    imu_topic = LaunchConfiguration('imu_topic')
+
     imu_fusion = LaunchConfiguration('imu_fusion')
     slam_localization = LaunchConfiguration('slam_localization')
 
@@ -38,8 +45,6 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
     config_substitutions = { 
             'enable_imu_fusion': imu_fusion.perform(context),
             'enable_slam_localization': slam_localization.perform(context),
-            'map_frame': 'map',
-            'odom_frame': 'odom',
             'base_frame': f'{indexed_robot_name}_base_link',
             'imu_frame':  f'{indexed_robot_name}_base_link',
             #'camera_optical_frames': [
@@ -65,19 +70,19 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
         parameters = [configured_config_file,],
         remappings = [
             ('visual_slam/image_0',
-            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra1/image_rect_raw'),
+            f'/{indexed_robot_name}{image0_topic.perform(context)}'),
             
             ('visual_slam/camera_info_0',
-            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra1/camera_info'),
+            f'/{indexed_robot_name}{camera0_topic.perform(context)}'),
             
             ('visual_slam/image_1',
-            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra2/image_rect_raw'),
+            f'/{indexed_robot_name}{image1_topic.perform(context)}'),
             
             ('visual_slam/camera_info_1',
-            f'/{indexed_robot_name}/sensors/realsense_d435/realsense_camera_node/infra2/camera_info'),
+            f'/{indexed_robot_name}{camera1_topic.perform(context)}'),
 
             ('visual_slam/imu', 
-            f'/{indexed_robot_name}/aircraft/imu'),
+            f'/{indexed_robot_name}{imu_topic.perform(context)}'),
         ],
     )
 
@@ -96,33 +101,53 @@ def generate_launch_description():
     return LaunchDescription([
         # Declare the launch arguments
         DeclareLaunchArgument(
-            name='use_sim_time',
-            default_value='False',
-            description='Use simulation (Gazebo) clock if true.'
+            name = 'robot_name',
+            description = 'Robot name (ex: "robot").'
         ),
         DeclareLaunchArgument(
-            name='robot_name',
-            description='Robot name (ex: "robot").'
-        ),
-        DeclareLaunchArgument(
-            name='robot_number',
-            default_value='',
-            description='Robot number, which will be appended to the robot name if defined ("<name>_<number>", '
+            name = 'robot_number',
+            default_value = '',
+            description = 'Robot number, which will be appended to the robot name if defined ("<name>_<number>", '
                         'default is empty).'
         ),
         DeclareLaunchArgument(
-            name='config',
-            description='Algorithm configuration.'
+            name = 'config',
+            description = 'Algorithm configuration.'
         ),
         DeclareLaunchArgument(
-            name='imu_fusion',
-            default_value='True',
-            description='Enable IMU fusion. (False = disbled)'
+            name = 'image0_topic',
+            default_value = '/sensors/realsense_d435/realsense_camera_node/infra1/image_rect_raw',
+            description = 'Input topic from camera 0. (sensor_msgs/Image)'
         ),
         DeclareLaunchArgument(
-            name='slam_localization',
-            default_value='True',
-            description='Activate SLAM localization. (False = disabled)'
+            name = 'camera0_topic',
+            default_value = '/sensors/realsense_d435/realsense_camera_node/infra1/camera_info',
+            description = 'Input topic from camera 0.(sensor_msgs/CameraInfo)'
+        ),
+        DeclareLaunchArgument(
+            name = 'image1_topic',
+            default_value = '/sensors/realsense_d435/realsense_camera_node/infra2/image_rect_raw',
+            description = 'Input topic from camera 1. (sensor_msgs/Image)'
+        ),
+        DeclareLaunchArgument(
+            name = 'camera1_topic',
+            default_value = '/sensors/realsense_d435/realsense_camera_node/infra2/camera_info',
+            description = 'Input topic from camera 1. (sensor_msgs/CameraInfo)'
+        ),
+        DeclareLaunchArgument(
+            name = 'imu_topic',
+            default_value = '/aircraft/imu',
+            description = 'Input topic from IMU. (sensor_msgs/Imu)'
+        ),
+        DeclareLaunchArgument(
+            name = 'imu_fusion',
+            default_value = 'True',
+            description = 'Enable IMU fusion. (False = disbled)'
+        ),
+        DeclareLaunchArgument(
+            name = 'slam_localization',
+            default_value = 'True',
+            description = 'Activate SLAM localization. (False = disabled)'
         ),
         # Perform the launch setup
         OpaqueFunction(function=launch_setup)
