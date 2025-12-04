@@ -1,6 +1,12 @@
-# example launch file.
-#
-# Created by Milos Cihlar on 13.10.2025
+# =============================================================
+# Project:   visual_inertial_odometry
+# File:      launch/isaac_ros_visual_slam.launch.py
+# Author:    Martin Kriz
+# Created:   2025-10-26
+# -------------------------------------------------------------
+# Description: Launch file for Isaac ROS Visual SLAM node
+# Notes: Launch file is based on Milos Cihlar example package
+# =============================================================
 
 from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
