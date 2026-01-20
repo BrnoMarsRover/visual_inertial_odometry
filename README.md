@@ -25,12 +25,13 @@ I followed these steps from the documentation:
 ### Launch file
 A custom launch file was created to integrate Isaac VIO into the namespaces that we are using. This example is command for our drone f450.
 ```bash
-ros2 launch visual_inertial_odometry issac_ros_visual_slam.launch.py \
-    robot_name:= f450 \
-    robot_number:= 1 \
-    config:= vio_isaac_f450.yaml \
-    imu_fusion:= True \
-    slam_localization:= True
+ros2 launch visual_inertial_odometry isaac_ros_visual_slam.launch.py \
+  robot_name:=f450 \
+  robot_number:=1 \
+  config:=vio_isaac_f450.yaml \
+  imu_fusion:=True \
+  slam_localization:=True
+
 ```
 
 ### IMU integration

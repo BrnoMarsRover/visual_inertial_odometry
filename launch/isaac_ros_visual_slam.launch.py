@@ -36,10 +36,10 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
 
     config = LaunchConfiguration('config')
 
-    image0_topic = LaunchConfiguration('image1_topic')
-    camera0_topic = LaunchConfiguration('camera1_topic')
-    image1_topic = LaunchConfiguration('image2_topic')
-    camera1_topic = LaunchConfiguration('camera2_topic')
+    image0_topic = LaunchConfiguration('image0_topic')
+    camera0_topic = LaunchConfiguration('camera0_topic')
+    image1_topic = LaunchConfiguration('image1_topic')
+    camera1_topic = LaunchConfiguration('camera1_topic')
     imu_topic = LaunchConfiguration('imu_topic')
 
     imu_fusion = LaunchConfiguration('imu_fusion')
