@@ -11,7 +11,8 @@ visual_slam_node:
     #Others from isaac example
     enable_image_denoising: False
     rectified_images: True
-    image_jitter_threshold_ms: 34.00    
+    image_jitter_threshold_ms: 34.00 
+    enable_imu_fusion: True   
     enable_slam_visualization: True
     enable_landmarks_view: True
     enable_observations_view: True
