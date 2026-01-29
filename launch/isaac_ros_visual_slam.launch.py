@@ -48,15 +48,17 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
     indexed_robot_name = [robot_name.perform(context), '_', robot_number.perform(context)] if robot_number.perform(context) else [robot_name.perform(context)]
     indexed_robot_name = ''.join(indexed_robot_name)
 
-    config_substitutions = { 
+    camera_optical_frames = [
+        f'{indexed_robot_name}_realsense_d435_infra1_optical_frame',
+        f'{indexed_robot_name}_realsense_d435_infra2_optical_frame',
+    ]
+
+    config_substitutions = {
             'enable_imu_fusion': imu_fusion.perform(context),
             'enable_slam_localization': slam_localization.perform(context),
             'base_frame': f'{indexed_robot_name}_base_link',
             'imu_frame':  f'{indexed_robot_name}_base_link',
-            #'camera_optical_frames': [
-            #    f'{indexed_robot_name}_realsense_d435_infra1_optical_frame',
-            #    f'{indexed_robot_name}_realsense_d435_infra2_optical_frame',
-            #   ],
+            'camera_optical_frames': safe_dump(camera_optical_frames),
     }
 
     config_dir = os.path.join(vio_dir_config, robot_name.perform(context))
