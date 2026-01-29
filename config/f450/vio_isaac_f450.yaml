@@ -2,17 +2,23 @@ visual_slam_node:
   ros__parameters:
 
     #IMU noise parameters measured and calculated with https://github.com/CruxDevStuff/allan_ros2.git
-    gyro_noise_density: 0.00012975667792863518
-    gyro_random_walk: 6.515000786205241e-06
-    accel_noise_density: 0.001457588076418319
-    accel_random_walk: 0.0002895559589895292
-    calibration_frequency: 90.0
+    #gyro_noise_density: 0.00012975667792863518
+    #gyro_random_walk: 6.515000786205241e-06
+    #accel_noise_density: 0.001457588076418319
+    #accel_random_walk: 0.0002895559589895292
+    #calibration_frequency: 90.0
+	  gyro_noise_density: 0.0025      # 10× větší šum gyroskopu
+	  gyro_random_walk: 0.00013       # 10× větší drift gyroskopu
+	  accel_noise_density: 0.03       # 10× větší šum akcelerometru
+	  accel_random_walk: 0.006        # 10× větší drift akcelerometru
+	  calibration_frequency: 50.0     # Toto nechávám stejné
+
 
     #Others from isaac example
     enable_image_denoising: False
     rectified_images: True
-    image_jitter_threshold_ms: 34.00 
-    enable_imu_fusion: True   
+    image_jitter_threshold_ms: 34.00
+    enable_imu_fusion: True
     enable_slam_visualization: True
     enable_landmarks_view: True
     enable_observations_view: True
