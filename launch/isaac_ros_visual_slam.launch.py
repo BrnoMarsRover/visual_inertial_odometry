@@ -20,7 +20,6 @@ from nav2_common.launch import RewrittenYaml
 
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
-from yaml import safe_dump
 
 import os
 from typing import Optional, List
@@ -58,7 +57,6 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
             'enable_slam_localization': slam_localization.perform(context),
             'base_frame': f'{indexed_robot_name}_base_link',
             'imu_frame':  f'{indexed_robot_name}_base_link',
-            'camera_optical_frames': safe_dump(camera_optical_frames),
     }
 
     config_dir = os.path.join(vio_dir_config, robot_name.perform(context))
@@ -75,7 +73,7 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
         name = 'visual_slam_node',
         namespace = indexed_robot_name + '/vio_isaac',
         plugin = 'nvidia::isaac_ros::visual_slam::VisualSlamNode',
-        parameters = [configured_config_file,],
+        parameters = [configured_config_file, {'camera_optical_frames': camera_optical_frames}],
         remappings = [
             ('visual_slam/image_0',
             f'/{indexed_robot_name}{image0_topic.perform(context)}'),
