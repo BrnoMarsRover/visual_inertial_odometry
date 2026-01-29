@@ -7,11 +7,11 @@ visual_slam_node:
     #accel_noise_density: 0.001457588076418319
     #accel_random_walk: 0.0002895559589895292
     #calibration_frequency: 90.0
-	  gyro_noise_density: 0.0025      # 10× větší šum gyroskopu
-	  gyro_random_walk: 0.00013       # 10× větší drift gyroskopu
-	  accel_noise_density: 0.03       # 10× větší šum akcelerometru
-	  accel_random_walk: 0.006        # 10× větší drift akcelerometru
-	  calibration_frequency: 50.0     # Toto nechávám stejné
+    gyro_noise_density: 0.0025      # 10× větší šum gyroskopu
+    gyro_random_walk: 0.00013       # 10× větší drift gyroskopu
+    accel_noise_density: 0.03       # 10× větší šum akcelerometru
+    accel_random_walk: 0.006        # 10× větší drift akcelerometru
+    calibration_frequency: 50.0     # Toto nechávám stejné
 
 
     #Others from isaac example
