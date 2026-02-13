@@ -34,12 +34,5 @@ ros2 launch visual_inertial_odometry isaac_ros_visual_slam.launch.py \
 
 ```
 
-### IMU integration
-The first time I tried the algorithm with IMU fusion enabled, it was very buggy, and the algorithm works more effectively with IMU fusion disabled.
-
-I took a measurement of IMU noise characteristics. I used [Alan ROS2](https://github.com/CruxDevStuff/allan_ros2.git) package. And the results is in f450 config file.
-
-Next step is to get exact tranformation between IMU and realsense.
-
 ## Authors
 - Martin Kriz
