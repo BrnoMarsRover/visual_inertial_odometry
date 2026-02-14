@@ -35,6 +35,22 @@ colcon build --packages-select visual_inertial_odometry
 source install/setup.bash
 ```
 
+### Run IMU Inverter
+
+```bash
+ros2 run visual_inertial_odometry imu_inverter.py
+```
+
+Subscribes to `/f450_1/aircraft/imu` and publishes inverted linear acceleration and angular velocity to `/f450_1/aircraft/imu/invert`.
+
+### Run IMU Accel Inverter
+
+```bash
+ros2 run visual_inertial_odometry imu_accel_inverter.py
+```
+
+Subscribes to `/f450_1/aircraft/imu` and publishes inverted linear acceleration (gyro unchanged) to `/f450_1/aircraft/imu/accel_invert`.
+
 ### Run IMU Filter
 
 ```bash
@@ -47,4 +63,16 @@ ros2 run imu_filter_madgwick imu_filter_madgwick_node \
   -p world_frame:=enu \
   -p remove_gravity:=false \
   -p gain:=0.01
+```
+
+### Run Visual SLAM (with inverted IMU)
+
+```bash
+ros2 launch visual_inertial_odometry isaac_ros_visual_slam.launch.py \
+  robot_name:=f450 \
+  robot_number:=1 \
+  config:=vio_isaac_f450.yaml \
+  imu_fusion:=True \
+  slam_localization:=False \
+  imu_topic:=/aircraft/imu/invert
 ```
