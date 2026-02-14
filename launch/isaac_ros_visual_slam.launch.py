@@ -54,7 +54,7 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
 
     config_substitutions = {
             'enable_imu_fusion': imu_fusion.perform(context),
-            'enable_slam_localization': slam_localization.perform(context),
+            'enable_localization_n_mapping': slam_localization.perform(context),
             'base_frame': f'{indexed_robot_name}_base_link',
             'imu_frame':  f'{indexed_robot_name}_base_link',
     }
