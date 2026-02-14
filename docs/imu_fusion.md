@@ -1,34 +1,47 @@
-# Fůze dat z IMU
+# IMU Data Fusion
 
-Když jsem poprvé vyzkoušel algoritmus se zapnutou IMU fuzí, byl velmi chybový a algoritmus funguje efektivněji bez ní.
+When I first tried the algorithm with IMU fusion enabled, it was very error-prone and the algorithm works more efficiently without it.
 
-## Příprava dat
+## Data Preparation
 
-- Provedl jsem měření charakteristik šumu IMU. Použil jsem balíček [Allan ROS2](https://github.com/CruxDevStuff/allan_ros2.git). Výsledky jsou v konfiguračním souboru f450.
+- I performed IMU noise characterization measurements. I used the [Allan ROS2](https://github.com/CruxDevStuff/allan_ros2.git) package. The results are in the f450 configuration file.
 
-- Z fusion modelu byla získána přesná transformace mezi kamerou a IMU, kde frame pro IMU uvažuji `base_frame`.
+- An accurate camera-to-IMU transformation was obtained from the fusion model, where the IMU frame is considered to be the `base_frame`.
 
-- Orientace os byla upravena tak, aby odpovídala konvenci souřadnicového systému ENU.
+- The axis orientation was adjusted to match the ENU coordinate system convention.
 
-## Let 11.02.2026 (indoor)
-Let při vypnutých motorech (dron byl držen v ruce) tak aby data z IMU byla snadno vyhodnotitelná. Během letu postupně s dronem pohybuju v jednotlivých osách, nejprve pro test akcelerometru a poté pro test gyroskopu.
+## Flight 11.02.2026 (indoor)
+Flight with motors off (the drone was held by hand) so that the IMU data would be easy to evaluate. During the flight, I gradually moved the drone along individual axes, first to test the accelerometer and then to test the gyroscope.
 
-Nahraná data jsou vyhodnocena v matlabu skriptem `imu_fusion_compare.m`.
+The recorded data are evaluated in MATLAB using the `imu_fusion_compare.m` script.
 
 <figure align="center">
   <img src="images/IMU_fusion_ENABLE_timeline.png" alt="IMU Fusion ENABLE timeline">
-  <figcaption><i>IMU Fusion ENABLE - timeline pozice, akcelerace a gyroskopu</i></figcaption>
+  <figcaption><i>IMU Fusion ENABLE - position, acceleration and gyroscope timeline</i></figcaption>
 </figure>
-Na obrázku je možné pozorovat všechny tři osy odometrie z VIO v závislosti na čase. Při zkoušce akcelerometru se problém s trhanou odometrií nijak neprojevil. Zajímavý moment je zvýrazněný červenou čarou, při zkoušce gyroskopu v ose y došlo nezmámé chybě díky které se dojde k chybě VIO. Od té chvíle spočítaná odometrie nedává smysl.
 
-### Závěr
+The figure shows all three axes of VIO odometry over time. During the accelerometer test, the problem with jerky odometry did not manifest. An interesting moment is highlighted by the red line — during the gyroscope test on the y-axis, an unknown error occurred which caused the VIO to fail. From that point on, the computed odometry no longer makes sense.
 
-- Orientace os IMU je správná (ověřeno podle obrazu z kamery).
-- Z dat nelze jednoznačně určit chybu, protože v označeném okamžiku mířila kamera RealSense směrem ke stropu na světla. Je tedy možné, že algoritmus v tu chvíli pouze upřednostnil data z IMU, což se mohlo stát i v jiných okamžicích.
+### Conclusion
 
-## Gravitační vektor
+- The IMU axis orientation is correct (verified against the camera image).
+- The error cannot be conclusively determined from the data, because at the marked moment the RealSense camera was pointing towards the ceiling lights. It is therefore possible that the algorithm simply prioritized the IMU data at that time, which could have also happened at other moments.
 
-Diskuzní [fórum](https://forums.developer.nvidia.com/t/imu-fusion/316150) tvrdí že:
+## Gravity Vector
 
-- Šipka gravitačního vektoru se poprvé objeví po úspěšné inicializaci (camera-to-IMU alignment), což trvá 10-20 sekund pohybu kamery. Od tohoto momentu běží IMU fúze kontinuálně.
-- Šipka gravitačního vektoru se znovu objeví v momentě, kdy dojde ke ztrátě visual trackingu a algoritmus následně znovu synchronizuje (re-alignment) kameru a IMU po obnovení trackingu.
+A discussion [forum post](https://forums.developer.nvidia.com/t/imu-fusion/316150) states that:
+
+- The gravity vector arrow first appears after successful initialization (camera-to-IMU alignment), which takes 10-20 seconds of camera movement. From this point on, IMU fusion runs continuously.
+- The gravity vector arrow reappears when visual tracking is lost and the algorithm subsequently re-aligns the camera and IMU after tracking is restored.                           
+
+After inspecting the gravity error, I discovered that the gravity vector was inverted (pointing up [0 0 9,81]).
+
+## [REP145](https://www.ros.org/reps/rep-0145.html)
+ROS2 convetion for IMU.
+
+- When the device is at rest, the vector will represent the specific force solely due to gravity. I.e. if the body z axis points upwards, its z axis should indicate +g. This data must be in m/s^2.
+
+- The rotational velocity is right handed with respect to the body axes, and independent of the orientation of the device. This data must be in rad/s.
+
+I fixed the IMU data based on this convetion and it looks like it works.
+
