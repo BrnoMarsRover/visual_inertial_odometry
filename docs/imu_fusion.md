@@ -52,6 +52,16 @@ Compare two flights with imu and without (slam disabled).
 
 The recorded data are evaluated in MATLAB using the `tracking_odometry_compare.m` script. Time alignment between the two flights was performed via cross-correlation of GPS odometry (the same recorded GPS data was replayed in both bags).
 
+Tested with this IMU noise parameters (measured)
+
+```bash
+    gyro_noise_density: 0.00012975667792863518
+    gyro_random_walk: 6.515000786205241e-06
+    accel_noise_density: 0.001457588076418319
+    accel_random_walk: 0.0002895559589895292
+    calibration_frequency: 90.0
+```
+
 ![Tracking Odometry IMU off vs IMU on](images/Tracking%20Odometry_IMU_off_vs_IMU_on_00.png)
 *Tracking odometry comparison - IMU disabled vs IMU enabled (SLAM disabled)*
 
@@ -69,3 +79,64 @@ By inverting the accelerometer axis, the IMU data was successfully fused into Is
 ### Next steps
 
 - Adjust IMU noise parameters (`gyroscope_noise_density`, `gyroscope_random_walk`, `accelerometer_noise_density`, `accelerometer_random_walk`) in the launch file to improve the IMU fusion accuracy.
+
+### Next tests with the same flight
+
+- imu_enabled_slam_disabled_01 (same parameters as for realsense IMU)
+```bash
+    gyro_noise_density: 0.000244
+    gyro_random_walk: 0.000019393
+    accel_noise_density: 0.001862
+    accel_random_walk: 0.003
+    calibration_frequency: 90.0
+```
+
+- imu_enabled_slam_disabled_02 (2x worse)
+```bash
+    gyro_noise_density: 0.0005
+    gyro_random_walk: 0.00004
+    accel_noise_density: 0.004
+    accel_random_walk: 0.006
+    calibration_frequency: 90.0
+```
+
+- imu_enabled_slam_disabled_03 (4x worse)
+```bash
+    gyro_noise_density: 0.001
+    gyro_random_walk: 0.00008
+    accel_noise_density: 0.008
+    accel_random_walk: 0.012
+    calibration_frequency: 90.0
+```
+
+- imu_enabled_slam_disabled_04 (8x worse)
+```bash
+    gyro_noise_density: 0.002
+    gyro_random_walk: 0.00016
+    accel_noise_density: 0.008
+    accel_random_walk: 0.024
+    calibration_frequency: 90.0
+```
+
+![IMU noise parameter comparison](images/Tracking%20Odometry_IMU_noise_comparison.png)
+*Tracking odometry comparison - IMU noise parameters 01-04 vs IMU disabled (SLAM disabled)*
+
+It was observed that the IMU fusion actually starts working approximately 45 s after launch. This can be identified by the VIO node starting to publish the gravity vector topic.
+
+Drift from origin (end position vs start position):
+
+| Bag | Absolute | X | Y | Z |
+|---|---|---|---|---|
+| **01** | 1.4699 m | -0.9108 m | 0.9879 m | -0.5960 m |
+| **02** | 0.7249 m | 0.3764 m | -0.2895 m | -0.5477 m |
+| **03** | 1.1241 m | 0.3340 m | -0.7510 m | -0.7668 m |
+| **04** | 0.5355 m | 0.1736 m | 0.3366 m | -0.3785 m |
+
+### Conclusion
+
+Counterintuitively, the results suggest that worsening the IMU noise parameters leads to lower drift — bag 04 (8x worse parameters) achieved the smallest absolute error (0.54 m), while bag 01 (RealSense default parameters) had the largest (1.47 m). This indicates that the algorithm performs better when it trusts the IMU data less and relies more on visual tracking. Overall, IMU fusion does not appear to be practically usable in the current setup, as even the best IMU-fused result (0.54 m) is still worse than running without IMU fusion entirely (0.47 m).
+
+### Next steps
+
+- Perform additional flights with a waiting period at the beginning to ensure IMU fusion is fully initialized (gravity vector published) before the flight starts.
+- Investigate filtering the IMU data before passing it to the algorithm.
