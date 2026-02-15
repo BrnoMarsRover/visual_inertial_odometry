@@ -15,10 +15,8 @@ Flight with motors off (the drone was held by hand) so that the IMU data would b
 
 The recorded data are evaluated in MATLAB using the `imu_fusion_compare.m` script.
 
-<figure align="center">
-  <img src="images/IMU_fusion_ENABLE_timeline.png" alt="IMU Fusion ENABLE timeline">
-  <figcaption><i>IMU Fusion ENABLE - position, acceleration and gyroscope timeline</i></figcaption>
-</figure>
+![IMU Fusion ENABLE timeline](images/IMU_fusion_ENABLE_timeline.png)
+*IMU Fusion ENABLE - position, acceleration and gyroscope timeline*
 
 The figure shows all three axes of VIO odometry over time. During the accelerometer test, the problem with jerky odometry did not manifest. An interesting moment is highlighted by the red line — during the gyroscope test on the y-axis, an unknown error occurred which caused the VIO to fail. From that point on, the computed odometry no longer makes sense.
 
@@ -45,3 +43,29 @@ ROS2 convetion for IMU.
 
 I fixed the IMU data based on this convetion and it looks like it works.
 
+## Flight 22.1.2026 (outdoor)
+Regular flight behind FEEC. Not sunny day.
+
+Compare two flights with imu and without (slam disabled).
+- imu_disabled_slam_disabled_00
+- imu_enabled_slam_disabled_00
+
+The recorded data are evaluated in MATLAB using the `tracking_odometry_compare.m` script. Time alignment between the two flights was performed via cross-correlation of GPS odometry (the same recorded GPS data was replayed in both bags).
+
+![Tracking Odometry IMU off vs IMU on](images/Tracking%20Odometry_IMU_off_vs_IMU_on_00.png)
+*Tracking odometry comparison - IMU disabled vs IMU enabled (SLAM disabled)*
+
+Drift from origin (end position vs start position):
+
+| | Absolute | X | Y | Z |
+|---|---|---|---|---|
+| **IMU disabled** | 0.4663 m | -0.3493 m | 0.2943 m | 0.0936 m |
+| **IMU enabled** | 3.1404 m | -0.6384 m | 3.0748 m | -0.0022 m |
+
+### Conclusion
+
+By inverting the accelerometer axis, the IMU data was successfully fused into Isaac ROS Visual SLAM. However, the results show that the odometry is still significantly more accurate without IMU fusion — the absolute drift with IMU enabled (3.14 m) is nearly 7× worse than without it (0.47 m), with the majority of the error concentrated in the Y axis.
+
+### Next steps
+
+- Adjust IMU noise parameters (`gyroscope_noise_density`, `gyroscope_random_walk`, `accelerometer_noise_density`, `accelerometer_random_walk`) in the launch file to improve the IMU fusion accuracy.
