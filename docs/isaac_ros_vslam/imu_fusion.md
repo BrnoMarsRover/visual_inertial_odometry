@@ -15,7 +15,7 @@ Flight with motors off (the drone was held by hand) so that the IMU data would b
 
 The recorded data are evaluated in MATLAB using the `imu_fusion_compare.m` script.
 
-![IMU Fusion ENABLE timeline](images/IMU_fusion_ENABLE_timeline.png)
+![IMU Fusion ENABLE timeline](../images/IMU_fusion_ENABLE_timeline.png)
 *IMU Fusion ENABLE - position, acceleration and gyroscope timeline*
 
 The figure shows all three axes of VIO odometry over time. During the accelerometer test, the problem with jerky odometry did not manifest. An interesting moment is highlighted by the red line — during the gyroscope test on the y-axis, an unknown error occurred which caused the VIO to fail. From that point on, the computed odometry no longer makes sense.
@@ -62,7 +62,7 @@ Tested with this IMU noise parameters (measured)
     calibration_frequency: 90.0
 ```
 
-![Tracking Odometry IMU off vs IMU on](images/Tracking%20Odometry_IMU_off_vs_IMU_on_00.png)
+![Tracking Odometry IMU off vs IMU on](../images/Tracking%20Odometry_IMU_off_vs_IMU_on_00.png)
 *Tracking odometry comparison - IMU disabled vs IMU enabled (SLAM disabled)*
 
 Drift from origin (end position vs start position):
@@ -118,7 +118,7 @@ By inverting the accelerometer axis, the IMU data was successfully fused into Is
     calibration_frequency: 90.0
 ```
 
-![IMU noise parameter comparison](images/Tracking%20Odometry_IMU_noise_comparison.png)
+![IMU noise parameter comparison](../images/Tracking%20Odometry_IMU_noise_comparison.png)
 *Tracking odometry comparison - IMU noise parameters 01-04 vs IMU disabled (SLAM disabled)*
 
 It was observed that the IMU fusion actually starts working approximately 45 s after launch. This can be identified by the VIO node starting to publish the gravity vector topic.
@@ -152,7 +152,7 @@ Tested bags:
 - imu_enabled_slam_disabled_03 (4x worse)
 - imu_enabled_slam_disabled_04 (8x worse)
 
-![IMU noise parameter comparison vs OptiTrack](images/Tracking_Odometry-IMU_noise_comparison_vs_OptiTrack.png)
+![IMU noise parameter comparison vs OptiTrack](../images/Tracking_Odometry-IMU_noise_comparison_vs_OptiTrack.png)
 *Tracking odometry comparison - IMU noise parameters 01-04 vs OptiTrack ground truth (SLAM disabled)*
 
 RMSE vs OptiTrack ground truth:
