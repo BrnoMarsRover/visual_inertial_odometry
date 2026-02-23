@@ -188,3 +188,28 @@ Bag 02 appears to be the most accurate among the IMU-fused configurations, achie
     accel_random_walk: 0.006
     calibration_frequency: 90.0
 ```
+
+## Flight 18.2.2026 (indoor, OptiTrack) — SLAM on, IMU on vs off
+
+Follow-up test with SLAM enabled in both configurations. IMU fusion used bag 02 parameters. This time the recording was started with a waiting period at the beginning to ensure the gravity vector was fully initialized before the movement started.
+
+The recorded data are evaluated in MATLAB using the `optitrack_odometry_compare.m` script (Section 3).
+
+![VIO vs OptiTrack: SLAM on - IMU off vs IMU on](../images/VIO_vs_OptiTrack:_SLAM_on_-_IMU_off_vs_IMU_on.png)
+*Tracking odometry comparison — SLAM on, IMU off (bag 00) vs IMU on (bag 05) vs OptiTrack ground truth*
+
+Drift from origin (end position vs start position):
+
+| Bag | Absolute | X | Y | Z |
+|---|---|---|---|---|
+| **00 (SLAM on, IMU off)** | 0.1201 m | +0.0720 m | -0.0725 m | -0.0631 m |
+| **05 (SLAM on, IMU on)** | 0.1186 m | +0.0874 m | -0.0150 m | -0.0788 m |
+
+### Conclusion
+
+The results show that VIO with and without IMU fusion performs virtually identically in this indoor test — the drift of both configurations is practically the same (0.12 m vs 0.12 m). This is a promising result, as it means IMU fusion no longer degrades accuracy after proper initialization. However, the indoor environment with motors off does not stress-test the IMU data — the real challenge will be an outdoor flight with spinning motors, where vibration-induced IMU noise may cause the fusion to diverge.
+
+### Next steps
+
+- Perform an outdoor flight with motors running to properly evaluate IMU fusion under real vibration conditions.
+- Wait for the gravity vector to be published before starting the movement (same as this test).

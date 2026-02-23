@@ -4,14 +4,16 @@
 % Cross-correlation of OptiTrack data is used to align bags in time
 % (analogous to GPS cross-correlation in tracking_odometry_compare.m).
 %
-% Section 1: SLAM enabled (IMU off) vs IMU enabled (SLAM off) - bags 00 vs 01
-% Section 2: IMU noise parameter comparison - bags 01-04
+% Section 1: SLAM on (IMU off) vs IMU on (SLAM off)          - bags 00 vs 01
+% Section 2: IMU noise parameter comparison (SLAM off)        - bags 01-04
+% Section 3: SLAM on (IMU off) vs SLAM on (IMU on, bag02 params, gravity wait) - bags 00 vs 05
 %
 % IMU noise parameters from docs/imu_fusion.md:
 %   01 - RealSense default: gyro_nd=2.44e-4, gyro_rw=1.94e-5, accel_nd=1.86e-3, accel_rw=3e-3
 %   02 - 2x worse:          gyro_nd=5e-4,    gyro_rw=4e-5,    accel_nd=4e-3,    accel_rw=6e-3
 %   03 - 4x worse:          gyro_nd=1e-3,    gyro_rw=8e-5,    accel_nd=8e-3,    accel_rw=1.2e-2
 %   04 - 8x worse:          gyro_nd=2e-3,    gyro_rw=1.6e-4,  accel_nd=1.6e-2,  accel_rw=2.4e-2
+%   05 - bag02 params, SLAM on, waited for gravity vector before movement
 
 clear all
 close all
@@ -27,7 +29,8 @@ bag_names = { ...
     'imu_enabled_slam_disabled_01', ...
     'imu_enabled_slam_disabled_02', ...
     'imu_enabled_slam_disabled_03', ...
-    'imu_enabled_slam_disabled_04'  ...
+    'imu_enabled_slam_disabled_04', ...
+    'imu_enabled_slam_enabled_05'   ...
 };
 n_bags = numel(bag_names);
 
@@ -223,22 +226,89 @@ end
 
 sgtitle('IMU noise parameter comparison vs OptiTrack (SLAM disabled)', 'FontSize', 14);
 
-%% PLOT - RMSE bar chart (all 5 bags)
-all_labels = {'00 (SLAM on)', '01 (default)', '02 (2x)', '03 (4x)', '04 (8x)'};
+%% PLOT - RMSE bar chart (bags 00-04, noise comparison)
+noise_bar_idx    = 1:5;
+noise_bar_labels = {'00 (SLAM on)', '01 (default)', '02 (2x)', '03 (4x)', '04 (8x)'};
 
-fig3 = figure('Name', 'RMSE comparison - all bags', 'NumberTitle', 'off');
+fig3 = figure('Name', 'RMSE comparison - bags 00-04', 'NumberTitle', 'off');
 set(fig3, 'Position', [100 100 900 500]);
 
-b = bar(rmse_all(:, 1:3), 'grouped');
+b = bar(rmse_all(noise_bar_idx, 1:3), 'grouped');
 b(1).FaceColor = [0.20 0.60 0.90];
 b(2).FaceColor = [0.90 0.40 0.20];
 b(3).FaceColor = [0.30 0.75 0.40];
-set(gca, 'XTick', 1:n_bags, 'XTickLabel', all_labels, 'FontSize', 10);
+set(gca, 'XTick', 1:numel(noise_bar_idx), 'XTickLabel', noise_bar_labels, 'FontSize', 10);
 xtickangle(20);
 ylabel('RMSE [m]');
 legend('X', 'Y', 'Z', 'Location', 'northeast');
-title('VIO vs OptiTrack RMSE per axis - IMU noise parameter comparison');
+title('VIO vs OptiTrack RMSE per axis - IMU noise parameter comparison (SLAM disabled)');
 grid on;
+
+%% =====================================================================
+%  SECTION 3: SLAM on (IMU off) vs SLAM on (IMU on) - bags 00 vs 05
+%  IMU on with bag02 params, gravity vector waited before movement
+%  =====================================================================
+
+fprintf('\n=== SECTION 3: SLAM on + IMU off vs SLAM on + IMU on ===\n');
+fprintf('  Offset bag_05 vs reference: %.3f s\n', time_offsets(6));
+
+fig4 = figure('Name', 'VIO vs OptiTrack: SLAM on - IMU off vs IMU on', 'NumberTitle', 'off');
+set(fig4, 'Position', [100 100 1200 800]);
+
+for ax = 1:3
+    subplot(3, 1, ax);
+    % Single OptiTrack reference (same recording in both bags)
+    plot(t_opt_al{1}, pos_opt_n{1}(:, ax), 'k-',  'LineWidth', 2.0); hold on;
+    plot(t_vio_al{1}, pos_vio_n{1}(:, ax), 'b-',  'LineWidth', 1.5);
+    plot(t_vio_al{6}, pos_vio_n{6}(:, ax), 'r-',  'LineWidth', 1.5);
+    hold off;
+    grid on;
+    set(gca, 'FontSize', 11);
+    xlabel('Time [s]');
+    ylabel(sprintf('%s [m]', axis_labels{ax}));
+    title(sprintf('Tracking odometry - %s axis', axis_labels{ax}));
+    legend('OptiTrack (ref)', '00 VIO (IMU off)', '05 VIO (IMU on)', 'Location', 'best');
+end
+
+sgtitle(sprintf('VIO vs OptiTrack: SLAM on - IMU off vs IMU on (bag02 params, gravity wait)\nRMSE 3D: %.4f m  /  %.4f m', ...
+    rmse_all(1,4), rmse_all(6,4)), 'FontSize', 13);
+
+%% PLOT - XY trajectory (top view)
+fig5 = figure('Name', 'Trajectory XY: SLAM on - IMU off vs IMU on', 'NumberTitle', 'off');
+set(fig5, 'Position', [150 150 700 650]);
+
+plot(pos_opt_n{1}(:,1), pos_opt_n{1}(:,2), 'k-',  'LineWidth', 2.0); hold on;
+plot(pos_vio_n{1}(:,1), pos_vio_n{1}(:,2), 'b-',  'LineWidth', 1.5);
+plot(pos_vio_n{6}(:,1), pos_vio_n{6}(:,2), 'r-',  'LineWidth', 1.5);
+% Start markers (circles)
+plot(pos_opt_n{1}(1,1), pos_opt_n{1}(1,2), 'ko', 'MarkerSize', 8, 'MarkerFaceColor', 'k');
+plot(pos_vio_n{1}(1,1), pos_vio_n{1}(1,2), 'bo', 'MarkerSize', 8, 'MarkerFaceColor', 'b');
+plot(pos_vio_n{6}(1,1), pos_vio_n{6}(1,2), 'ro', 'MarkerSize', 8, 'MarkerFaceColor', 'r');
+% End markers (squares)
+plot(pos_opt_n{1}(end,1), pos_opt_n{1}(end,2), 'ks', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
+plot(pos_vio_n{1}(end,1), pos_vio_n{1}(end,2), 'bs', 'MarkerSize', 10, 'MarkerFaceColor', 'b');
+plot(pos_vio_n{6}(end,1), pos_vio_n{6}(end,2), 'rs', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
+hold off;
+axis equal; grid on;
+set(gca, 'FontSize', 11);
+xlabel('X [m]'); ylabel('Y [m]');
+legend('OptiTrack (ref)', '00 VIO (IMU off)', '05 VIO (IMU on)', 'Location', 'best');
+title(sprintf('Trajectory XY  |  RMSE 3D: 00=%.4f m, 05=%.4f m', rmse_all(1,4), rmse_all(6,4)));
+
+% Drift table as text annotation
+d_opt = pos_opt_n{1}(end,:) - pos_opt_n{1}(1,:);
+d_00  = pos_vio_n{1}(end,:) - pos_vio_n{1}(1,:);
+d_05  = pos_vio_n{6}(end,:) - pos_vio_n{6}(1,:);
+
+tbl = sprintf('Drift from origin (end - start)\n');
+tbl = [tbl, sprintf('%-18s  %6s  %6s  %6s  %6s\n', '',       'Abs',   'X',    'Y',    'Z')];
+tbl = [tbl, sprintf('%-18s  %5.3fm  %+.3fm  %+.3fm  %+.3fm\n', 'OptiTrack', norm(d_opt), d_opt(1), d_opt(2), d_opt(3))];
+tbl = [tbl, sprintf('%-18s  %5.3fm  %+.3fm  %+.3fm  %+.3fm\n', '00 (IMU off)',  norm(d_00),  d_00(1),  d_00(2),  d_00(3))];
+tbl = [tbl, sprintf('%-18s  %5.3fm  %+.3fm  %+.3fm  %+.3fm',   '05 (IMU on)',   norm(d_05),  d_05(1),  d_05(2),  d_05(3))];
+
+annotation('textbox', [0.13 0.01 0.80 0.13], 'String', tbl, ...
+    'FontSize', 9, 'FontName', 'Monospaced', 'EdgeColor', [0.7 0.7 0.7], ...
+    'BackgroundColor', [0.97 0.97 0.97], 'FitBoxToText', false);
 
 fprintf('\nAll done!\n');
 
