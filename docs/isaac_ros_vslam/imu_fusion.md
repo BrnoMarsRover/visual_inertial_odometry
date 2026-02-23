@@ -113,7 +113,7 @@ By inverting the accelerometer axis, the IMU data was successfully fused into Is
 ```bash
     gyro_noise_density: 0.002
     gyro_random_walk: 0.00016
-    accel_noise_density: 0.008
+    accel_noise_density: 0.016
     accel_random_walk: 0.024
     calibration_frequency: 90.0
 ```
@@ -140,3 +140,51 @@ Counterintuitively, the results suggest that worsening the IMU noise parameters 
 
 - Perform additional flights with a waiting period at the beginning to ensure IMU fusion is fully initialized (gravity vector published) before the flight starts.
 - Investigate filtering the IMU data before passing it to the algorithm.
+
+## Flight 18.2.2026 (indoor, OptiTrack)
+
+Indoor flight with OptiTrack motion capture system used as ground truth. The recorded data are evaluated in MATLAB using the `optitrack_odometry_compare.m` script. Time alignment between bags was performed via cross-correlation of the OptiTrack data (`/mocap/husky_1`), which is the same continuous recording streamed into all bags.
+
+Tested bags:
+- imu_disabled_slam_enabled_00 (SLAM enabled, IMU disabled)
+- imu_enabled_slam_disabled_01 (SLAM disabled, IMU enabled)
+- imu_enabled_slam_disabled_02 (2x worse)
+- imu_enabled_slam_disabled_03 (4x worse)
+- imu_enabled_slam_disabled_04 (8x worse)
+
+![IMU noise parameter comparison vs OptiTrack](images/Tracking_Odometry-IMU_noise_comparison_vs_OptiTrack.png)
+*Tracking odometry comparison - IMU noise parameters 01-04 vs OptiTrack ground truth (SLAM disabled)*
+
+RMSE vs OptiTrack ground truth:
+
+| Bag | RMSE 3D | RMSE X | RMSE Y | RMSE Z |
+|---|---|---|---|---|
+| **00 (SLAM on, IMU off)** | 0.1628 m | 0.1326 m | 0.0898 m | 0.0292 m |
+| **01 (default)** | 0.2755 m | 0.1565 m | 0.1109 m | 0.1978 m |
+| **02 (2x worse)** | 0.1597 m | 0.1254 m | 0.0923 m | 0.0352 m |
+| **03 (4x worse)** | 0.1663 m | 0.1307 m | 0.0937 m | 0.0424 m |
+| **04 (8x worse)** | 0.1717 m | 0.1316 m | 0.1031 m | 0.0390 m |
+
+Drift from origin (end position vs start position):
+
+| Bag | Absolute | X | Y | Z |
+|---|---|---|---|---|
+| **00 (SLAM on, IMU off)** | 0.1201 m | 0.0720 m | -0.0725 m | -0.0631 m |
+| **01 (default)** | 0.5734 m | 0.1581 m | -0.0119 m | -0.5510 m |
+| **02 (2x worse)** | 0.0928 m | 0.0423 m | -0.0436 m | -0.0701 m |
+| **03 (4x worse)** | 0.1498 m | 0.1183 m | -0.0893 m | -0.0222 m |
+| **04 (8x worse)** | 0.1678 m | 0.1037 m | -0.1318 m | -0.0074 m |
+
+### Conclusion
+
+With OptiTrack as ground truth, the results confirm the previous findings — SLAM without IMU fusion (bag 00) achieves the best accuracy with RMSE 3D of 0.16 m and drift of 0.12 m. Among the IMU-fused bags, bag 01 (RealSense default parameters) performs the worst (RMSE 3D = 0.28 m, drift = 0.57 m, almost entirely in the Z axis). Bags 02–04 (worse noise parameters) all achieve RMSE 3D around 0.16–0.17 m, comparable to SLAM without IMU. This again confirms that the algorithm performs better when it trusts the IMU less.
+
+Bag 02 appears to be the most accurate among the IMU-fused configurations, achieving the lowest RMSE 3D (0.1597 m) and the smallest drift (0.0928 m). For any further IMU fusion experiments, the parameters from bag 02 will be used as the baseline:
+
+```bash
+    gyro_noise_density: 0.0005
+    gyro_random_walk: 0.00004
+    accel_noise_density: 0.004
+    accel_random_walk: 0.006
+    calibration_frequency: 90.0
+```
