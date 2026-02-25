@@ -15,6 +15,15 @@ cd ${ISAAC_ROS_WS}/src/isaac_ros_common && \
 sudo apt-get install -y ros-humble-isaac-ros-visual-slam
 ```
 
+### Fix vslam Not Running
+
+Pokud vslam nejede, reinstaluj balíček:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y --fix-missing ros-humble-isaac-ros-visual-slam
+```
+
 ### Source ROS Environment
 
 ```bash
