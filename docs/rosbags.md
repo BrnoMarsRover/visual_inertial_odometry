@@ -15,3 +15,13 @@ Indoor flight without motors, just to test IMU. IMU accelerometer was inverted. 
 ### 18.2.2026
 
 Indoor flight without motors, with optitrack topics.
+
+### 4.3.2026
+
+Outdoor, sunny, camera angle 0°
+
+### 6.3.2026
+
+Two flights
+Outdoor, sunny, long flights, camera angle 0°
+
