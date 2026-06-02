@@ -2,3 +2,9 @@
 .vscode
 rosbags/
 *.asv
+*.avi
+*.mp4
+*.mov
+*.mkv
+*.bag
+*.mcap
