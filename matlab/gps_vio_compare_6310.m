@@ -293,10 +293,24 @@ fprintf('VSLAM status: %d zpráv, %d failures, track mean=%.2f ms, max=%.2f ms\n
 o               = load(obs_mat);
 t_obs_norm      = o.t_obs_abs - t_vio(1);
 feature_count   = o.feature_count(:);
-feat_low_thresh = 80;   % pod tímto = problematické tracking (empiricky z issue #200)
+feat_low_thresh = 80;
 fprintf('Feature count: %d framů, mean=%.0f, min=%.0f, max=%.0f, <80: %.1f%%\n', ...
         numel(feature_count), mean(feature_count), min(feature_count), ...
         max(feature_count), 100*mean(feature_count < feat_low_thresh));
+
+% Feature pixel koordináty (pro overlay na kamerovém snímku)
+feat_px_mat = fullfile(mat_dir, 'feat_pixels.mat');
+feat_py_script = fullfile(mat_dir, 'extract_feature_pixels.py');
+if ~isfile(feat_px_mat)
+    fprintf('feat_pixels.mat nenalezen, spouštím Python projekci...\n');
+    ret = system(sprintf('bash -c "source /opt/ros/humble/setup.bash && python3 %s"', feat_py_script));
+    if ret ~= 0, error('Projekce selhala. Spusť: python3 %s', feat_py_script); end
+end
+fp          = load(feat_px_mat);
+t_feat_norm = fp.t_feat_abs(:) - t_vio(1);
+feat_px     = fp.feat_px;   % (M x Nmax), NaN padding
+feat_py     = fp.feat_py;
+fprintf('Feature pixels: %d framů, max %d features/frame\n', size(feat_px,1), size(feat_px,2));
 
 figure('Name', 'Camera frame timing', 'NumberTitle', 'off', ...
        'Position', [100 100 1100 500]);
@@ -655,6 +669,11 @@ if make_drift_videos_v2
         xregion(ax_cov2, t_peak-video_window, t_peak+video_window, ...
                 'FaceColor',[1 0.8 0],'FaceAlpha',0.08);
 
+        % --- Inicializace feature overlay na kamerovém panelu ---
+        axes(ax_cam2); hold(ax_cam2, 'on');
+        hfeat_dot = plot(ax_cam2, NaN, NaN, 'g.', 'MarkerSize', 6);
+        hold(ax_cam2, 'off');
+
         % --- Frame loop ---
         for fi = 1:length(cam_msgs_win)
             msg         = cam_msgs_win{fi};
@@ -670,7 +689,16 @@ if make_drift_videos_v2
             end
 
             imshow(img, [], 'Parent', ax_cam2);
-            title(ax_cam2, sprintf('t = %.2f s', t_rel), 'FontSize', 10);
+
+            % Feature overlay — nejbližší frame z observations
+            [~, fi_feat] = min(abs(t_feat_norm - t_rel));
+            px_row = feat_px(fi_feat, :);
+            py_row = feat_py(fi_feat, :);
+            n_feat = sum(isfinite(px_row));
+            hold(ax_cam2, 'on');
+            plot(ax_cam2, px_row, py_row, 'g.', 'MarkerSize', 6);
+            hold(ax_cam2, 'off');
+            title(ax_cam2, sprintf('t = %.2f s  |  features: %d', t_rel, n_feat), 'FontSize', 9);
 
             set(hcur_err2,  'Value', t_rel);
             set(hcur_dt2,   'Value', t_rel);

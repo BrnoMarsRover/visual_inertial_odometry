@@ -21,5 +21,11 @@ ros2 launch visual_inertial_odometry isaac_ros_visual_slam.launch.py \
 - [IMU fusion](/docs/isaac_ros_vslam/imu_fusion.md)
 - [Used commands](/docs/isaac_ros_vslam/commands.md)
 
+## [sqrtVINS](https://github.com/rpng/sqrtVINS)
+### Launch file command
+```bash
+ros2 launch visual_inertial_odometry sqrtVINS.launch.py robot_name:=f450 robot_number:=1
+```
+
 ## Authors
 - Martin Kriz

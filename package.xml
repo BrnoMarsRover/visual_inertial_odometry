@@ -3,7 +3,7 @@
 <package format="3">
   <name>visual_inertial_odometry</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Launch and config files for sqrtVINS VIO with RealSense D435 + Pixhawk IMU.</description>
   <maintainer email="martin.kriz002@gmail.com">martin</maintainer>
   <license>Apache-2.0</license>
 
@@ -11,6 +11,10 @@
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>ov_srvins</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
