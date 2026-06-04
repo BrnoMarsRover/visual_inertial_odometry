@@ -6,6 +6,9 @@ SOURCE="source $WS/install/setup.bash"
 
 if [ "$1" == "kill" ]; then
     tmux kill-session -t $SESSION 2>/dev/null && echo "Session '$SESSION' ukončena." || echo "Session '$SESSION' neexistuje."
+    pkill -f "oakd_camera_driver" 2>/dev/null
+    pkill -f "sqrtVINS" 2>/dev/null
+    pkill -f "ros2 launch" 2>/dev/null
     exit 0
 fi
 
@@ -25,8 +28,7 @@ tmux split-window -h -t $SESSION:0
 tmux send-keys -t $SESSION:0.1 "$SOURCE && ros2 launch visual_inertial_odometry sqrtVINS.launch.py \
   robot_name:=$ROBOT_NAME \
   robot_number:=$ROBOT_NUMBER \
-  image_topic:=/oak/left/image_raw \
-  imu_topic:=/oak/imu/data \
+  config_dir:=f450_sqrtVINS_stereo \
   rviz_enable:=true" Enter
 
 tmux attach -t $SESSION

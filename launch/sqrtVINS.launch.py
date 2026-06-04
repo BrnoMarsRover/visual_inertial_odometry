@@ -3,7 +3,8 @@
 # File:      launch/sqrtVINS.launch.py
 # Author:    Martin Kriz
 # -------------------------------------------------------------
-# Description: Launch file for sqrtVINS with RealSense D435 + Pixhawk IMU
+# Description: Launch file for sqrtVINS (mono and stereo)
+# Topics (camera + IMU) are read directly from kalibr yaml files in config_dir.
 # =============================================================
 
 from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
@@ -21,15 +22,14 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
 
     robot_name   = LaunchConfiguration('robot_name').perform(context)
     robot_number = LaunchConfiguration('robot_number').perform(context)
-    image_topic  = LaunchConfiguration('image_topic').perform(context)
-    imu_topic    = LaunchConfiguration('imu_topic').perform(context)
+    config_dir   = LaunchConfiguration('config_dir').perform(context)
 
     indexed_robot_name = f'{robot_name}_{robot_number}' if robot_number else robot_name
 
     config_path = os.path.join(
         get_package_share_directory('visual_inertial_odometry'),
         'config',
-        'f450_sqrtVINS',
+        config_dir,
         'estimator_config.yaml',
     )
 
@@ -43,14 +43,8 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
         output='screen',
         parameters=[
             {'verbosity': LaunchConfiguration('verbosity')},
-            {'use_stereo': False},
-            {'max_cameras': 1},
             {'save_total_state': LaunchConfiguration('save_total_state')},
             {'config_path': config_path},
-        ],
-        remappings=[
-            ('/sqrtvins/image_raw', f'/{indexed_robot_name}{image_topic}'),
-            ('/sqrtvins/imu',       f'/{indexed_robot_name}{imu_topic}'),
         ],
     )
 
@@ -81,14 +75,8 @@ def generate_launch_description():
             description='Robot number appended to robot name if set ("f450_1"), default is empty.',
         ),
         DeclareLaunchArgument(
-            name='image_topic',
-            default_value='/sensors/realsense_d435/realsense_camera_node/infra1/image_rect_raw',
-            description='Camera image topic relative to robot prefix. (sensor_msgs/Image)',
-        ),
-        DeclareLaunchArgument(
-            name='imu_topic',
-            default_value='/aircraft/imu',
-            description='IMU topic relative to robot prefix. (sensor_msgs/Imu)',
+            name='config_dir',
+            description='Config directory name under share/visual_inertial_odometry/config/ (ex: "f450_sqrtVINS_stereo").',
         ),
         DeclareLaunchArgument(
             name='rviz_enable',
