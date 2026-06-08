@@ -32,6 +32,7 @@ tmux send-keys -t "$SESSION:0.1" "cd /mnt/ros2bags" Enter
 tmux send-keys -t "$SESSION:0.2" "$SOURCE && ros2 launch visual_inertial_odometry sqrtVINS.launch.py \
   robot_name:=$ROBOT_NAME \
   robot_number:=$ROBOT_NUMBER \
+  config_dir:=f450_sqrtVINS_stereo \
   image_topic:=/oak/left/image_raw \
   imu_topic:=/oak/imu/data \
   rviz_enable:=true" Enter
