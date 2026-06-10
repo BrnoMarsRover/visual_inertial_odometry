@@ -105,12 +105,12 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             name='topic_camera0',
-            default_value='/f450_1/oak/left/image_raw',
+            default_value='/f450_1/sensors/oak_d_pro_w/left/image_raw',
             description='Left camera image topic.',
         ),
         DeclareLaunchArgument(
             name='topic_camera1',
-            default_value='/f450_1/oak/right/image_raw',
+            default_value='/f450_1/sensors/oak_d_pro_w/right/image_raw',
             description='Right camera image topic.',
         ),
         OpaqueFunction(function=launch_setup),

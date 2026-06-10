@@ -22,6 +22,12 @@ ros2 launch visual_inertial_odometry isaac_ros_visual_slam.launch.py \
 - [Used commands](/docs/isaac_ros_vslam/commands.md)
 
 ## [sqrtVINS](https://github.com/rpng/sqrtVINS)
+
+### Build
+```bash
+MAKEFLAGS="-j1" colcon build --parallel-workers 1 --packages-select ov_core ov_srvins
+```
+
 ### Launch file command
 ```bash
 ros2 launch visual_inertial_odometry sqrtVINS.launch.py robot_name:=f450 robot_number:=1
