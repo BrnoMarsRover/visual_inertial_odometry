@@ -45,6 +45,9 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
             {'verbosity': LaunchConfiguration('verbosity')},
             {'save_total_state': LaunchConfiguration('save_total_state')},
             {'config_path': config_path},
+            {'topic_imu': LaunchConfiguration('topic_imu')},
+            {'topic_camera0': LaunchConfiguration('topic_camera0')},
+            {'topic_camera1': LaunchConfiguration('topic_camera1')},
         ],
     )
 
@@ -92,6 +95,21 @@ def generate_launch_description():
             name='save_total_state',
             default_value='false',
             description='Record total state with calibration and features to txt file.',
+        ),
+        DeclareLaunchArgument(
+            name='topic_imu',
+            default_value='/f450_1/sensors/oak_d_pro_w/imu/data',
+            description='IMU topic to subscribe to.',
+        ),
+        DeclareLaunchArgument(
+            name='topic_camera0',
+            default_value='/f450_1/oak/left/image_raw',
+            description='Left camera image topic.',
+        ),
+        DeclareLaunchArgument(
+            name='topic_camera1',
+            default_value='/f450_1/oak/right/image_raw',
+            description='Right camera image topic.',
         ),
         OpaqueFunction(function=launch_setup),
     ])

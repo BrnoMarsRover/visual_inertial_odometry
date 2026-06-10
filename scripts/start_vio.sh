@@ -29,6 +29,9 @@ tmux send-keys -t $SESSION:0.1 "$SOURCE && ros2 launch visual_inertial_odometry 
   robot_name:=$ROBOT_NAME \
   robot_number:=$ROBOT_NUMBER \
   config_dir:=f450_sqrtVINS_stereo \
+  topic_imu:=/f450_1/sensors/oak_d_pro_w/imu/data \
+  topic_camera0:=/f450_1/oak/left/image_raw \
+  topic_camera1:=/f450_1/oak/right/image_raw \
   rviz_enable:=true" Enter
 
 tmux attach -t $SESSION
