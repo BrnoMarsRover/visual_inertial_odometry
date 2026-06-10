@@ -45,9 +45,11 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
             {'verbosity': LaunchConfiguration('verbosity')},
             {'save_total_state': LaunchConfiguration('save_total_state')},
             {'config_path': config_path},
-            {'topic_imu': LaunchConfiguration('topic_imu')},
-            {'topic_camera0': LaunchConfiguration('topic_camera0')},
-            {'topic_camera1': LaunchConfiguration('topic_camera1')},
+        ],
+        remappings=[
+            ('/f450_1/oak/imu/data',        LaunchConfiguration('topic_imu')),
+            ('/f450_1/oak/left/image_raw',   LaunchConfiguration('topic_camera0')),
+            ('/f450_1/oak/right/image_raw',  LaunchConfiguration('topic_camera1')),
         ],
     )
 
