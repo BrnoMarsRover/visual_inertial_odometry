@@ -15,26 +15,54 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 import os
+import yaml
 from typing import Optional, List
+
+
+def _load_opencv_yaml(path: str) -> dict:
+    """Load OpenCV-style YAML (strips %YAML:x.x directive that PyYAML rejects)."""
+    with open(path) as f:
+        content = f.read()
+    lines = [l for l in content.splitlines() if not l.startswith('%YAML')]
+    return yaml.safe_load('\n'.join(lines))
 
 
 def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntity]]:
 
+    use_sim_time = LaunchConfiguration('use_sim_time')
     robot_name   = LaunchConfiguration('robot_name').perform(context)
     robot_number = LaunchConfiguration('robot_number').perform(context)
     config_dir   = LaunchConfiguration('config_dir').perform(context)
 
-    indexed_robot_name = f'{robot_name}_{robot_number}' if robot_number else robot_name
+    indexed_robot_name = [robot_name, '_', robot_number] if robot_number else [robot_name]
+    indexed_robot_name = ''.join(indexed_robot_name)
 
-    config_path = os.path.join(
-        get_package_share_directory('visual_inertial_odometry'),
-        'config',
-        config_dir,
-        'estimator_config.yaml',
-    )
+    pkg_share = get_package_share_directory('visual_inertial_odometry')
+    config_base = os.path.join(pkg_share, 'config', config_dir)
 
+    config_path = os.path.join(config_base, 'estimator_config.yaml')
     if not os.path.isfile(config_path):
         return [LogInfo(msg=f'ERROR: config not found: {config_path}')]
+
+    estimator_cfg = _load_opencv_yaml(config_path)
+    imu_yaml_path = os.path.join(config_base, estimator_cfg['relative_config_imu'])
+    cam_yaml_path = os.path.join(config_base, estimator_cfg['relative_config_imucam'])
+
+    imu_topic_yaml  = _load_opencv_yaml(imu_yaml_path)['imu0']['rostopic']
+    cam_yaml        = _load_opencv_yaml(cam_yaml_path)
+    cam0_topic_yaml = cam_yaml['cam0']['rostopic']
+    cam1_topic_yaml = cam_yaml.get('cam1', {}).get('rostopic')
+
+    topic_imu     = LaunchConfiguration('topic_imu').perform(context)
+    topic_camera0 = LaunchConfiguration('topic_camera0').perform(context)
+    topic_camera1 = LaunchConfiguration('topic_camera1').perform(context)
+
+    remappings = [
+        (imu_topic_yaml,  topic_imu  or imu_topic_yaml),
+        (cam0_topic_yaml, topic_camera0 or cam0_topic_yaml),
+    ]
+    if cam1_topic_yaml:
+        remappings.append((cam1_topic_yaml, topic_camera1 or cam1_topic_yaml))
 
     node = Node(
         package='ov_srvins',
@@ -42,15 +70,12 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
         namespace=indexed_robot_name + '/ov_srvins',
         output='screen',
         parameters=[
+            {'use_sim_time': use_sim_time},
             {'verbosity': LaunchConfiguration('verbosity')},
             {'save_total_state': LaunchConfiguration('save_total_state')},
             {'config_path': config_path},
         ],
-        remappings=[
-            ('/f450_1/oak/imu/data',        LaunchConfiguration('topic_imu')),
-            ('/f450_1/oak/left/image_raw',   LaunchConfiguration('topic_camera0')),
-            ('/f450_1/oak/right/image_raw',  LaunchConfiguration('topic_camera1')),
-        ],
+        remappings=remappings,
     )
 
     rviz_node = Node(
@@ -70,6 +95,11 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
 
 def generate_launch_description():
     return LaunchDescription([
+        DeclareLaunchArgument(
+            name='use_sim_time',
+            default_value='False',
+            description='Use simulation (Gazebo) clock if true.'
+        ),
         DeclareLaunchArgument(
             name='robot_name',
             description='Robot name (ex: "f450").',
@@ -100,18 +130,18 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             name='topic_imu',
-            default_value='/f450_1/sensors/oak_d_pro_w/imu/data',
-            description='IMU topic to subscribe to.',
+            default_value='',
+            description='Override IMU topic. Empty = use rostopic from kalibr_imu_chain.yaml.',
         ),
         DeclareLaunchArgument(
             name='topic_camera0',
-            default_value='/f450_1/sensors/oak_d_pro_w/left/image_raw',
-            description='Left camera image topic.',
+            default_value='',
+            description='Override left camera topic. Empty = use rostopic from kalibr_imucam_chain.yaml.',
         ),
         DeclareLaunchArgument(
             name='topic_camera1',
-            default_value='/f450_1/sensors/oak_d_pro_w/right/image_raw',
-            description='Right camera image topic.',
+            default_value='',
+            description='Override right camera topic. Empty = use rostopic from kalibr_imucam_chain.yaml.',
         ),
         OpaqueFunction(function=launch_setup),
     ])
