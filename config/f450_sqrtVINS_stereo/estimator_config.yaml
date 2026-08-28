@@ -10,8 +10,8 @@ max_cameras: 2 # how many cameras we have 1 = mono, 2 = stereo, >2 = binocular (
 use_imuavg: true
 use_rk4int: true
 
-calib_cam_extrinsics: true # if the transform between camera and IMU should be optimized R_ItoC, p_CinI
-calib_cam_intrinsics: false # if camera intrinsics should be optimized (focal, center, distortion)
+calib_cam_extrinsics: false # locked — correct T_imu_cam loaded from kalibr_imucam_chain.yaml
+calib_cam_intrinsics: false # locked — kalibr intrinsics trusted
 calib_cam_timeoffset: true # if timeoffset between camera and IMU should be optimized
 calib_imu_intrinsics: true # if imu intrinsics should be calibrated (rotation and skew-scale matrix)
 calib_imu_g_sensitivity: true # if gyroscope gravity sensitivity (Tg) should be calibrated
@@ -30,11 +30,11 @@ feat_rep_aruco: "ANCHORED_MSCKF_INVERSE_DEPTH"
 
 # zero velocity update parameters we can use
 # we support either IMU-based or disparity detection.
-try_zupt: true
-zupt_chi2_multipler: 1 # set to 0 for only disp-based
-zupt_max_velocity: 0.1
+try_zupt: false
+zupt_chi2_multipler: 0 # set to 0 for only disp-based
+zupt_max_velocity: 0.3
 zupt_noise_multiplier: 10
-zupt_max_disparity: 0.3 # set to 0 for only imu-based
+zupt_max_disparity: 0.5 # set to 0 for only imu-based
 zupt_only_at_beginning: false
 
 # ==================================================================

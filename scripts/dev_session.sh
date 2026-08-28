@@ -28,15 +28,15 @@ tmux send-keys -t "$SESSION:0.0" "cd $REPO && claude" Enter
 # Right top: ros2bags directory
 tmux send-keys -t "$SESSION:0.1" "cd /mnt/ros2bags" Enter
 
-# Right bottom: sqrtVINS launch
+# Right middle: sqrtVINS launch (tee to log file)
 tmux send-keys -t "$SESSION:0.2" "$SOURCE && ros2 launch visual_inertial_odometry sqrtVINS.launch.py \
   robot_name:=$ROBOT_NAME \
   robot_number:=$ROBOT_NUMBER \
   config_dir:=f450_sqrtVINS_stereo \
-  topic_imu:=/f450_1/oak/imu/data \
-  topic_camera0:=/f450_1/oak/left/image_raw \
-  topic_camera1:=/f450_1/oak/right/image_raw \
-  rviz_enable:=true" Enter
+  topic_imu:=/f450_1/sensors/oak_d_pro_w/imu/data \
+  topic_camera0:=/f450_1/sensors/oak_d_pro_w/left/image_raw \
+  topic_camera1:=/f450_1/sensors/oak_d_pro_w/right/image_raw \
+  rviz_enable:=true 2>&1 | tee /tmp/vio_launch.log" Enter
 
 # Focus left pane (claude)
 tmux select-pane -t "$SESSION:0.0"

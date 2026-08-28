@@ -88,6 +88,7 @@ def launch_setup(context: LaunchContext) -> Optional[List[LaunchDescriptionEntit
             ),
             '--ros-args', '--log-level', 'warn',
         ],
+        parameters=[{'use_sim_time': use_sim_time}],
     )
 
     return [node, rviz_node]

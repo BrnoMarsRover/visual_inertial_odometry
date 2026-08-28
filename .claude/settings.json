@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ros2 bag info *)",
+      "Bash(ros2 topic echo *)",
+      "Bash(ros2 topic list *)",
+      "Bash(tmux display-message *)",
+      "Bash(tmux show-options *)",
+      "Bash(tmux list-panes *)",
+      "Bash(tmux -V*)",
+      "Bash(lsblk *)"
+    ]
+  }
+}
